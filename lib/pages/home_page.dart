@@ -12,7 +12,12 @@ class HomePage extends GetView<HomePageController> {
       Obx(()=>Scaffold(
           appBar: AppBar(),
           bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
             items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.save),
+                label: 'ذخیره',
+              ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.home),
                 label: 'افزودن عکس',
@@ -23,7 +28,7 @@ class HomePage extends GetView<HomePageController> {
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.school),
-                label: 'افزودن تمپلیت',
+                label: 'افزودن قاب',
               ),
             ],
             currentIndex: controller.selectedIndex.value,

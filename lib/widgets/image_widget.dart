@@ -12,38 +12,31 @@ class _ImageWidgetState extends State<ImageWidget> {
   @override
   Widget build(BuildContext context) {
     return
-      InkWell(
-        onTap: (){
-          setState(() {
-            deleteIcon = !deleteIcon;
-          });
-        },
-        child: Stack(
-        children: [
-          Align(
-            alignment: Alignment.center,
-              child: widget.image),
-          deleteIcon?
-          Align(
-            child:
-            InkWell(
-              onTap: (){
-                widget.deleteImage(widget);
-              },
-              child: Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.grey.withOpacity(0.5),
-                ),
-                child: Icon(Icons.delete,color: Colors.red,),
+      Stack(
+      children: [
+        Align(
+          alignment: Alignment.center,
+            child: widget.image),
+        deleteIcon?
+        Align(
+          child:
+          InkWell(
+            onTap: (){
+              widget.deleteImage(widget);
+            },
+            child: Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.grey.withOpacity(0.5),
               ),
+              child: Icon(Icons.delete,color: Colors.red,),
             ),
-            alignment: Alignment.center,
-          ):Container()
-        ],
-    ),
-      );
+          ),
+          alignment: Alignment.center,
+        ):Container()
+      ],
+    );
   }
 }

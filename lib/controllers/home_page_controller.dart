@@ -11,19 +11,21 @@ class HomePageController extends GetxController{
   RxInt selectedIndex = 0.obs;
   var texts = <Widget>[].obs;
   TextEditingController textEditingController = TextEditingController();
-  Rx<HSVColor> currentColor = HSVColor.fromColor(Colors.black).obs;
+  Rx<Color> currentColor = Colors.black.obs;
   RxInt selectedStackIndex = 0.obs;
   ImagePicker _picker = ImagePicker();
   Rx<XFile> image = XFile("").obs;
-  onColorPicked(HSVColor pickedColor){
+  onColorPicked(Color pickedColor){
     currentColor.value = pickedColor;
   }
   onMenuTapped(int index){
     switch (index){
       case 0:
-        pickImageFromGallery();
         break;
       case 1:
+        pickImageFromGallery();
+        break;
+      case 2:
         Get.bottomSheet(
             Container(
               height: 200,
@@ -40,7 +42,7 @@ class HomePageController extends GetxController{
                           child: TextField(
                             maxLines: null,
                             // textInputAction: TextInputAction.done,
-                            style: TextStyle(color: currentColor.value.toColor()),
+                            style: TextStyle(color: currentColor.value),
                             controller: textEditingController,
                           ),
                         ),
@@ -63,11 +65,12 @@ class HomePageController extends GetxController{
                           Get.back();
                           texts.add(ResizableWidget(
                             resizableItemModel: ResizableItemModel(
-                                child: Text(textEditingController.text,style: TextStyle(color: currentColor.value.toColor()),),
+                                child: Text(textEditingController.text,style: TextStyle(color: currentColor.value),),
                                 title: textEditingController.text,
                                 color: currentColor.value,
                                 deleteItem: deleteItem,
-                                editItem: editItem
+                                editItem: editItem,
+                                bringToFront: bringToFront
                             ),
                           ));
                           textEditingController.clear();
@@ -90,6 +93,14 @@ class HomePageController extends GetxController{
   deleteItem(ResizableWidget widget){
     texts.remove(widget);
   }
+  bringToFront(ResizableWidget widget){
+    List<Widget> tempList = [];
+    tempList.addAll(texts);
+    tempList.remove(widget);
+    texts.clear();
+    texts.add(widget);
+    texts.addAll(tempList);
+  }
   editItem(ResizableWidget widget){
     textEditingController.text = widget.resizableItemModel.title;
     currentColor.value = widget.resizableItemModel.color;
@@ -109,7 +120,7 @@ class HomePageController extends GetxController{
                       child: TextField(
                         maxLines: null,
                         // textInputAction: TextInputAction.done,
-                        style: TextStyle(color: currentColor.value.toColor()),
+                        style: TextStyle(color: currentColor.value),
                         controller: textEditingController,
                       ),
                     ),
@@ -135,7 +146,7 @@ class HomePageController extends GetxController{
                           {
                             texts[i] = ResizableWidget(
                               resizableItemModel: ResizableItemModel(
-                                  child: Text(textEditingController.text,style: TextStyle(color: currentColor.value.toColor()),),
+                                  child: Text(textEditingController.text,style: TextStyle(color: currentColor.value),),
                                   editItem: editItem,
                                   deleteItem: deleteItem,
                                   color: currentColor.value,
@@ -158,14 +169,16 @@ class HomePageController extends GetxController{
   }
   pickImageFromGallery() async{
     image.value = await _picker.pickImage(source: ImageSource.gallery);
-    texts.add(ImageWidget(image: Image.file(File(image.value.path),fit: BoxFit.cover),deleteImage: deleteImage,)
+    texts.add(
+        ResizableWidget(resizableItemModel: ResizableItemModel(
+          child: Image.file(File(image.value.path),fit: BoxFit.cover),deleteItem: deleteItem,
+            bringToFront: bringToFront
+        ),)
     );
     // texts.add(
     //   ResizableWidget(resizableItemModel: ResizableItemModel(
     //       child: Image.file(File(image.value.path),fit: BoxFit.contain))
     //   ),);
   }
-  deleteImage(ImageWidget imageWidget){
-    texts.remove(imageWidget);
-  }
+
 }

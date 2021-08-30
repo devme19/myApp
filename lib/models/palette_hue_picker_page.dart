@@ -3,15 +3,15 @@ import 'package:flutter_hsvcolor_picker/flutter_hsvcolor_picker.dart';
 
 class PaletteHuePickerPage extends StatefulWidget {
   PaletteHuePickerPage({Key key,this.pickedColor,this.currentColor}) : super(key: key);
-  ValueChanged<HSVColor> pickedColor;
-  HSVColor currentColor ;
+  ValueChanged<Color> pickedColor;
+  Color currentColor ;
   @override
   _PaletteHuePickerPageState createState() => _PaletteHuePickerPageState();
 }
 
 class _PaletteHuePickerPageState extends State<PaletteHuePickerPage> {
 
-  void onChanged(HSVColor value) {
+  void onChanged(Color value) {
     widget.currentColor = value;
     widget.pickedColor(value);
   }
@@ -35,17 +35,25 @@ class _PaletteHuePickerPageState extends State<PaletteHuePickerPage> {
               children: <Widget>[
                 FloatingActionButton(
                   onPressed: () {},
-                  backgroundColor: widget.currentColor.toColor(),
+                  backgroundColor: widget.currentColor,
                 ),
                 const Divider(),
 
                 ///---------------------------------
-                PaletteHuePicker(
+                ColorPicker(
                   color: widget.currentColor,
                   onChanged: (value) => super.setState(
-                    () => onChanged(value),
+                        () => onChanged(value),
                   ),
-                )
+                  initialPicker: Picker.paletteHue,
+                ),
+                // PaletteHuePicker(
+                //   color: widget.currentColor,
+                //
+                //   onChanged: (value) => super.setState(
+                //     () => onChanged(value),
+                //   ),
+                // )
 
                 ///---------------------------------
               ],

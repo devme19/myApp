@@ -12,19 +12,14 @@ class ResizableWidget extends StatefulWidget {
 const ballDiameter = 30.0;
 
 class _ResizableWidgetState extends State<ResizableWidget> {
-  double height = 50;
-  double width = 100;
-
-  double top = 0;
-  double left = 0;
   bool editable = true;
   void onDrag(double dx, double dy) {
-    var newHeight = height + dy;
-    var newWidth = width + dx;
+    var newHeight = widget.resizableItemModel.height + dy;
+    var newWidth = widget.resizableItemModel.width + dx;
 
     setState(() {
-      height = newHeight > 0 ? newHeight : 0;
-      width = newWidth > 0 ? newWidth : 0;
+      widget.resizableItemModel.height = newHeight > 0 ? newHeight : 0;
+      widget.resizableItemModel.width = newWidth > 0 ? newWidth : 0;
     });
   }
 
@@ -36,10 +31,10 @@ class _ResizableWidgetState extends State<ResizableWidget> {
 
         editable?
         Positioned(
-          top: top-50,
-          left: left,
+          top: widget.resizableItemModel.top-50,
+          left: widget.resizableItemModel.left,
           child: Container(
-            width: width,
+            width: widget.resizableItemModel.width,
             // color: Colors.purple.withOpacity(0.3),
             child: Row(
               children: [
@@ -48,19 +43,23 @@ class _ResizableWidgetState extends State<ResizableWidget> {
                     widget.resizableItemModel.deleteItem(widget);
                   }, icon: Icon(Icons.delete,color: Colors.red,)),
                 ),
-                
+                Expanded(child: InkWell(
+                  onTap: ()=>widget.resizableItemModel.bringToFront(widget),
+                  child: Image.asset('assets/icons/bring-to-front.png',height: 20,width: 20,),
+                )),
                 Expanded(
-                  child: IconButton(onPressed: (){
+                  child: widget.resizableItemModel.editItem != null?
+                  IconButton(onPressed: (){
                     widget.resizableItemModel.editItem(widget);
-                  }, icon: Icon(Icons.edit,color: Colors.green,)),
+                  }, icon: Icon(Icons.edit,color: Colors.green,)):Container(),
                 )
               ],
             ),
           ),
         ):Container(),
         Positioned(
-          top: top,
-          left: left,
+          top: widget.resizableItemModel.top,
+          left: widget.resizableItemModel.left,
           child:
           InkWell(
             onTap: (){
@@ -69,160 +68,160 @@ class _ResizableWidgetState extends State<ResizableWidget> {
               });
             },
             child: Container(
-              height: height,
-              width: width,
+              height: widget.resizableItemModel.height,
+              width: widget.resizableItemModel.width,
               color: editable? Colors.grey.withOpacity(0.3):Colors.transparent,
-              child: FittedBox(child: widget.resizableItemModel.child,),
+              child: FittedBox(child: widget.resizableItemModel.child,fit: BoxFit.contain,),
             ),
           ),
         ),
         // top left
         editable?Positioned(
-          top: top - ballDiameter / 2,
-          left: left - ballDiameter / 2,
+          top: widget.resizableItemModel.top - ballDiameter / 2,
+          left: widget.resizableItemModel.left - ballDiameter / 2,
           child: ManipulatingBall(
             onDrag: (dx, dy) {
               var mid = (dx + dy) / 2;
-              var newHeight = height - 2 * mid;
-              var newWidth = width - 2 * mid;
+              var newHeight = widget.resizableItemModel.height - 2 * mid;
+              var newWidth = widget.resizableItemModel.width - 2 * mid;
 
               setState(() {
-                height = newHeight > 0 ? newHeight : 0;
-                width = newWidth > 0 ? newWidth : 0;
-                top = top + mid;
-                left = left + mid;
+                widget.resizableItemModel.height = newHeight > 0 ? newHeight : 0;
+                widget.resizableItemModel.width = newWidth > 0 ? newWidth : 0;
+                widget.resizableItemModel.top = widget.resizableItemModel.top + mid;
+                widget.resizableItemModel.left = widget.resizableItemModel.left + mid;
               });
             },
           ),
         ):Container(),
         // top middle
         editable?Positioned(
-          top: top - ballDiameter / 2,
-          left: left + width / 2 - ballDiameter / 2,
+          top: widget.resizableItemModel.top - ballDiameter / 2,
+          left: widget.resizableItemModel.left + widget.resizableItemModel.width / 2 - ballDiameter / 2,
           child: ManipulatingBall(
             onDrag: (dx, dy) {
-              var newHeight = height - dy;
+              var newHeight = widget.resizableItemModel.height - dy;
 
               setState(() {
-                height = newHeight > 0 ? newHeight : 0;
-                top = top + dy;
+                widget.resizableItemModel.height = newHeight > 0 ? newHeight : 0;
+                widget.resizableItemModel.top = widget.resizableItemModel.top + dy;
               });
             },
           ),
         ):Container(),
         // top right
         editable?Positioned(
-          top: top - ballDiameter / 2,
-          left: left + width - ballDiameter / 2,
+          top: widget.resizableItemModel.top - ballDiameter / 2,
+          left: widget.resizableItemModel.left + widget.resizableItemModel.width - ballDiameter / 2,
           child: ManipulatingBall(
             onDrag: (dx, dy) {
               var mid = (dx + (dy * -1)) / 2;
 
-              var newHeight = height + 2 * mid;
-              var newWidth = width + 2 * mid;
+              var newHeight = widget.resizableItemModel.height + 2 * mid;
+              var newWidth = widget.resizableItemModel.width + 2 * mid;
 
               setState(() {
-                height = newHeight > 0 ? newHeight : 0;
-                width = newWidth > 0 ? newWidth : 0;
-                top = top - mid;
-                left = left - mid;
+                widget.resizableItemModel.height = newHeight > 0 ? newHeight : 0;
+                widget.resizableItemModel.width = newWidth > 0 ? newWidth : 0;
+                widget.resizableItemModel.top = widget.resizableItemModel.top - mid;
+                widget.resizableItemModel.left = widget.resizableItemModel.left - mid;
               });
             },
           ),
         ):Container(),
         // center right
         editable?Positioned(
-          top: top + height / 2 - ballDiameter / 2,
-          left: left + width - ballDiameter / 2,
+          top: widget.resizableItemModel.top + widget.resizableItemModel.height / 2 - ballDiameter / 2,
+          left: widget.resizableItemModel.left + widget.resizableItemModel.width - ballDiameter / 2,
           child: ManipulatingBall(
             onDrag: (dx, dy) {
-              var newWidth = width + dx;
+              var newWidth = widget.resizableItemModel.width + dx;
 
               setState(() {
-                width = newWidth > 0 ? newWidth : 0;
+                widget.resizableItemModel.width = newWidth > 0 ? newWidth : 0;
               });
             },
           ),
         ):Container(),
         // bottom right
         editable?Positioned(
-          top: top + height - ballDiameter / 2,
-          left: left + width - ballDiameter / 2,
+          top: widget.resizableItemModel.top + widget.resizableItemModel.height - ballDiameter / 2,
+          left: widget.resizableItemModel.left + widget.resizableItemModel.width - ballDiameter / 2,
           child: ManipulatingBall(
             onDrag: (dx, dy) {
               var mid = (dx + dy) / 2;
 
-              var newHeight = height + 2 * mid;
-              var newWidth = width + 2 * mid;
+              var newHeight = widget.resizableItemModel.height + 2 * mid;
+              var newWidth = widget.resizableItemModel.width + 2 * mid;
 
               setState(() {
-                height = newHeight > 0 ? newHeight : 0;
-                width = newWidth > 0 ? newWidth : 0;
-                top = top - mid;
-                left = left - mid;
+                widget.resizableItemModel.height = newHeight > 0 ? newHeight : 0;
+                widget.resizableItemModel.width = newWidth > 0 ? newWidth : 0;
+                widget.resizableItemModel.top = widget.resizableItemModel.top - mid;
+                widget.resizableItemModel.left = widget.resizableItemModel.left - mid;
               });
             },
           ),
         ):Container(),
         // bottom center
         editable?Positioned(
-          top: top + height - ballDiameter / 2,
-          left: left + width / 2 - ballDiameter / 2,
+          top: widget.resizableItemModel.top + widget.resizableItemModel.height - ballDiameter / 2,
+          left: widget.resizableItemModel.left + widget.resizableItemModel.width / 2 - ballDiameter / 2,
           child: ManipulatingBall(
             onDrag: (dx, dy) {
-              var newHeight = height + dy;
+              var newHeight = widget.resizableItemModel.height + dy;
 
               setState(() {
-                height = newHeight > 0 ? newHeight : 0;
+                widget.resizableItemModel.height = newHeight > 0 ? newHeight : 0;
               });
             },
           ),
         ):Container(),
         // bottom left
         editable?Positioned(
-          top: top + height - ballDiameter / 2,
-          left: left - ballDiameter / 2,
+          top: widget.resizableItemModel.top + widget.resizableItemModel.height - ballDiameter / 2,
+          left: widget.resizableItemModel.left - ballDiameter / 2,
           child: ManipulatingBall(
             onDrag: (dx, dy) {
               var mid = ((dx * -1) + dy) / 2;
 
-              var newHeight = height + 2 * mid;
-              var newWidth = width + 2 * mid;
+              var newHeight = widget.resizableItemModel.height + 2 * mid;
+              var newWidth = widget.resizableItemModel.width + 2 * mid;
 
               setState(() {
-                height = newHeight > 0 ? newHeight : 0;
-                width = newWidth > 0 ? newWidth : 0;
-                top = top - mid;
-                left = left - mid;
+                widget.resizableItemModel.height = newHeight > 0 ? newHeight : 0;
+                widget.resizableItemModel.width = newWidth > 0 ? newWidth : 0;
+                widget.resizableItemModel.top = widget.resizableItemModel.top - mid;
+                widget.resizableItemModel.left = widget.resizableItemModel.left - mid;
               });
             },
           ),
         ):Container(),
         //left center
         editable?Positioned(
-          top: top + height / 2 - ballDiameter / 2,
-          left: left - ballDiameter / 2,
+          top: widget.resizableItemModel.top + widget.resizableItemModel.height / 2 - ballDiameter / 2,
+          left: widget.resizableItemModel.left - ballDiameter / 2,
           child: ManipulatingBall(
             onDrag: (dx, dy) {
-              var newWidth = width - dx;
+              var newWidth = widget.resizableItemModel.width - dx;
 
               setState(() {
-                width = newWidth > 0 ? newWidth : 0;
-                left = left + dx;
+                widget.resizableItemModel.width = newWidth > 0 ? newWidth : 0;
+                widget.resizableItemModel.left = widget.resizableItemModel.left + dx;
               });
             },
           ),
         ):Container(),
         // center center
         editable?Positioned(
-          top: top + height / 2 - ballDiameter / 2,
-          left: left + width / 2 - ballDiameter / 2,
+          top: widget.resizableItemModel.top + widget.resizableItemModel.height / 2 - ballDiameter / 2,
+          left: widget.resizableItemModel.left + widget.resizableItemModel.width / 2 - ballDiameter / 2,
           child: ManipulatingBall(
             isMove: true,
             onDrag: (dx, dy) {
               setState(() {
-                top = top + dy;
-                left = left + dx;
+                widget.resizableItemModel.top = widget.resizableItemModel.top + dy;
+                widget.resizableItemModel.left = widget.resizableItemModel.left + dx;
               });
             },
           ),
