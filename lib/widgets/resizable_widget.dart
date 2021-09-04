@@ -36,7 +36,8 @@ class _ResizableWidgetState extends State<ResizableWidget> {
           child: Container(
             width: widget.resizableItemModel.width,
             // color: Colors.purple.withOpacity(0.3),
-            child: Row(
+            child:
+            Row(
               children: [
                 Expanded(
                   child: IconButton(onPressed: (){

@@ -1,9 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_hsvcolor_picker/flutter_hsvcolor_picker.dart';
 import 'package:get/get.dart';
-import 'package:myapp/models/palette_hue_picker_page.dart';
 import 'package:myapp/controllers/home_page_controller.dart';
-import 'package:myapp/widgets/resizable_widget.dart';
 
 class HomePage extends GetView<HomePageController> {
   @override
@@ -36,39 +35,15 @@ class HomePage extends GetView<HomePageController> {
             onTap: controller.onMenuTapped,
           ),
           body:
-        Container(
-          child:
-          Row(
+        RepaintBoundary(
+          key: controller.globalKey,
+          child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child: IndexedStack(
-                      index: controller.selectedStackIndex.value,
-                      children: [
-                        Container(
-                          width: Get.width,
-                          height: Get.height,
-                          // color: Colors.yellow.withOpacity(0.3),
-                          child: Stack(children: controller.texts,),
-                        ),
-                        Container(
-                          width: 200,
-                          height: 200,
-                          color: Colors.grey,
-                        ),
-                      ],
-                    ),
-                  ),
-                  // IconButton(icon: Icon(Icons.add), onPressed: (){
-                  //   if(controller.selectedStackIndex.value == 0)
-                  //     controller.selectedStackIndex.value = 1;
-                  //   else
-                  //     controller.selectedStackIndex.value = 0;
-                  // }),
-                ],
+              Text(controller.savedImagePath.value),
+              Expanded(
+                child: Stack(
+                    children: controller.texts),
               ),
             ],
           ),

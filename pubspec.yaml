@@ -32,6 +32,7 @@ dependencies:
   gesture_x_detector: ^1.0.0
   flutter_hsvcolor_picker: ^1.1.0
   image_picker: ^0.8.3+3
+  path_provider: ^2.0.3
 dev_dependencies:
   flutter_test:
     sdk: flutter

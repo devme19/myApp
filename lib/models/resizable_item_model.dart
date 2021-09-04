@@ -3,9 +3,9 @@ import 'package:myapp/widgets/resizable_widget.dart';
 
 class ResizableItemModel{
   Widget child;
-  ValueChanged<ResizableWidget> deleteItem;
+  ValueChanged<Widget> deleteItem;
   ValueChanged<ResizableWidget> editItem;
-  ValueChanged<ResizableWidget> bringToFront;
+  ValueChanged<Widget> bringToFront;
   Color color;
   Color bgColor;
   String title;
