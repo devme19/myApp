@@ -2,7 +2,10 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/models/resizable_item_model.dart';
 class ResizableWidget extends StatefulWidget {
-
+  _ResizableWidgetState widgetState = new _ResizableWidgetState();
+  isSelected(){
+    widgetState.isSelect();
+  }
   ResizableWidget({this.resizableItemModel});
   final ResizableItemModel resizableItemModel;
   @override
@@ -12,52 +15,20 @@ class ResizableWidget extends StatefulWidget {
 const ballDiameter = 30.0;
 
 class _ResizableWidgetState extends State<ResizableWidget> {
-  bool editable = true;
-  void onDrag(double dx, double dy) {
-    var newHeight = widget.resizableItemModel.height + dy;
-    var newWidth = widget.resizableItemModel.width + dx;
 
-    setState(() {
-      widget.resizableItemModel.height = newHeight > 0 ? newHeight : 0;
-      widget.resizableItemModel.width = newWidth > 0 ? newWidth : 0;
-    });
+  bool isSelected = false;
+  isSelect(){
+    isSelected = true;
   }
-
   @override
   Widget build(BuildContext context) {
     return
+      widget.resizableItemModel.isFrame?
+      Container(
+        child: Center(child: widget.resizableItemModel.child),
+      ):
       Stack(
       children: <Widget>[
-
-        editable?
-        Positioned(
-          top: widget.resizableItemModel.top-50,
-          left: widget.resizableItemModel.left,
-          child: Container(
-            width: widget.resizableItemModel.width,
-            // color: Colors.purple.withOpacity(0.3),
-            child:
-            Row(
-              children: [
-                Expanded(
-                  child: IconButton(onPressed: (){
-                    widget.resizableItemModel.deleteItem(widget);
-                  }, icon: Icon(Icons.delete,color: Colors.red,)),
-                ),
-                Expanded(child: InkWell(
-                  onTap: ()=>widget.resizableItemModel.bringToFront(widget),
-                  child: Image.asset('assets/icons/bring-to-front.png',height: 20,width: 20,),
-                )),
-                Expanded(
-                  child: widget.resizableItemModel.editItem != null?
-                  IconButton(onPressed: (){
-                    widget.resizableItemModel.editItem(widget);
-                  }, icon: Icon(Icons.edit,color: Colors.green,)):Container(),
-                )
-              ],
-            ),
-          ),
-        ):Container(),
         Positioned(
           top: widget.resizableItemModel.top,
           left: widget.resizableItemModel.left,
@@ -65,19 +36,19 @@ class _ResizableWidgetState extends State<ResizableWidget> {
           InkWell(
             onTap: (){
               setState(() {
-                editable = !editable;
+                isSelected = !isSelected;
               });
             },
             child: Container(
               height: widget.resizableItemModel.height,
               width: widget.resizableItemModel.width,
-              color: editable? Colors.grey.withOpacity(0.3):Colors.transparent,
+              color: isSelected? Colors.grey.withOpacity(0.3):Colors.transparent,
               child: FittedBox(child: widget.resizableItemModel.child,fit: BoxFit.contain,),
             ),
           ),
         ),
         // top left
-        editable?Positioned(
+        isSelected?Positioned(
           top: widget.resizableItemModel.top - ballDiameter / 2,
           left: widget.resizableItemModel.left - ballDiameter / 2,
           child: ManipulatingBall(
@@ -96,7 +67,7 @@ class _ResizableWidgetState extends State<ResizableWidget> {
           ),
         ):Container(),
         // top middle
-        editable?Positioned(
+        isSelected?Positioned(
           top: widget.resizableItemModel.top - ballDiameter / 2,
           left: widget.resizableItemModel.left + widget.resizableItemModel.width / 2 - ballDiameter / 2,
           child: ManipulatingBall(
@@ -111,7 +82,7 @@ class _ResizableWidgetState extends State<ResizableWidget> {
           ),
         ):Container(),
         // top right
-        editable?Positioned(
+        isSelected?Positioned(
           top: widget.resizableItemModel.top - ballDiameter / 2,
           left: widget.resizableItemModel.left + widget.resizableItemModel.width - ballDiameter / 2,
           child: ManipulatingBall(
@@ -131,7 +102,7 @@ class _ResizableWidgetState extends State<ResizableWidget> {
           ),
         ):Container(),
         // center right
-        editable?Positioned(
+        isSelected?Positioned(
           top: widget.resizableItemModel.top + widget.resizableItemModel.height / 2 - ballDiameter / 2,
           left: widget.resizableItemModel.left + widget.resizableItemModel.width - ballDiameter / 2,
           child: ManipulatingBall(
@@ -145,7 +116,7 @@ class _ResizableWidgetState extends State<ResizableWidget> {
           ),
         ):Container(),
         // bottom right
-        editable?Positioned(
+        isSelected?Positioned(
           top: widget.resizableItemModel.top + widget.resizableItemModel.height - ballDiameter / 2,
           left: widget.resizableItemModel.left + widget.resizableItemModel.width - ballDiameter / 2,
           child: ManipulatingBall(
@@ -165,7 +136,7 @@ class _ResizableWidgetState extends State<ResizableWidget> {
           ),
         ):Container(),
         // bottom center
-        editable?Positioned(
+        isSelected?Positioned(
           top: widget.resizableItemModel.top + widget.resizableItemModel.height - ballDiameter / 2,
           left: widget.resizableItemModel.left + widget.resizableItemModel.width / 2 - ballDiameter / 2,
           child: ManipulatingBall(
@@ -179,7 +150,7 @@ class _ResizableWidgetState extends State<ResizableWidget> {
           ),
         ):Container(),
         // bottom left
-        editable?Positioned(
+        isSelected?Positioned(
           top: widget.resizableItemModel.top + widget.resizableItemModel.height - ballDiameter / 2,
           left: widget.resizableItemModel.left - ballDiameter / 2,
           child: ManipulatingBall(
@@ -199,7 +170,7 @@ class _ResizableWidgetState extends State<ResizableWidget> {
           ),
         ):Container(),
         //left center
-        editable?Positioned(
+        isSelected?Positioned(
           top: widget.resizableItemModel.top + widget.resizableItemModel.height / 2 - ballDiameter / 2,
           left: widget.resizableItemModel.left - ballDiameter / 2,
           child: ManipulatingBall(
@@ -214,7 +185,7 @@ class _ResizableWidgetState extends State<ResizableWidget> {
           ),
         ):Container(),
         // center center
-        editable?Positioned(
+        isSelected?Positioned(
           top: widget.resizableItemModel.top + widget.resizableItemModel.height / 2 - ballDiameter / 2,
           left: widget.resizableItemModel.left + widget.resizableItemModel.width / 2 - ballDiameter / 2,
           child: ManipulatingBall(

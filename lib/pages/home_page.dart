@@ -9,6 +9,16 @@ class HomePage extends GetView<HomePageController> {
   Widget build(BuildContext context) {
     return
       Obx(()=>Scaffold(
+        drawer: Drawer(
+          child: ReorderableListView(
+            header: Container(
+              color: Colors.deepOrangeAccent,
+              height: Get.height/6,
+            ),
+            children: controller.reorderableList(),
+            onReorder: controller.reorderData,
+          ),
+        ),
           appBar: AppBar(),
           bottomNavigationBar: BottomNavigationBar(
             type: BottomNavigationBarType.fixed,
@@ -37,17 +47,10 @@ class HomePage extends GetView<HomePageController> {
           body:
         RepaintBoundary(
           key: controller.globalKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(controller.savedImagePath.value),
-              Expanded(
-                child: Stack(
-                    children: controller.texts),
-              ),
-            ],
-          ),
+          child: Stack(
+              children: controller.layout),
         ),
       ));
   }
+
 }
