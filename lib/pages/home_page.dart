@@ -15,8 +15,55 @@ class HomePage extends GetView<HomePageController> {
               color: Colors.deepOrangeAccent,
               height: Get.height/6,
             ),
-            children: controller.reorderableList(),
-            onReorder: controller.reorderData,
+            children: [
+              for(int i=0;i<controller.layout.length;i++)
+                Card(
+                    // color:controller.keys[0].?Colors.grey:Colors.white ,
+                    key: ValueKey(controller.layout[i]),
+                    child: ListTile(
+                      onTap: () {
+                         controller.onListTileTap(i);
+                        Get.back();
+                      },
+                      trailing:
+                      Container(
+                        // color: Colors.grey,
+                        width: 80,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: InkWell(
+                                  onTap: () {
+                                    Get.back();
+                                    controller.onEditListTile(i);
+
+                                  },
+                                  child: Icon(
+                                    Icons.edit,
+                                    color: Colors.green,
+                                  )),
+                            ),
+                            SizedBox(width: 30,),
+                            Expanded(
+                              child: InkWell(
+                                  onTap: () {
+                                    controller.onDeleteListTile(i);
+                                    Get.back();
+                                  },
+                                  child: Icon(
+                                    Icons.delete,
+                                    color: Colors.red,
+                                  )),
+                            ),
+                          ],
+                        ),
+                      ),
+                      title: Text(
+
+                        controller.layout[i].resizableItemModel.title ,overflow: TextOverflow.ellipsis,),
+                    ))
+            ],
+            onReorder: reorderData,
           ),
         ),
           appBar: AppBar(),
@@ -51,6 +98,17 @@ class HomePage extends GetView<HomePageController> {
               children: controller.layout),
         ),
       ));
+  }
+  void reorderData(int oldIndex, int newIndex){
+    if(newIndex>oldIndex){
+      newIndex-=1;
+    }
+    final item =controller.keys.removeAt(oldIndex);
+    final widget = controller.layout.removeAt(oldIndex);
+    controller.layout.insert(newIndex, widget);
+    controller.keys.insert(newIndex, item);
+    // if(controller.selectedItemIndex.value != -1)
+    //   controller.selectedItemIndex.value = newIndex;
   }
 
 }

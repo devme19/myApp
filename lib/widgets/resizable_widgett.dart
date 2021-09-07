@@ -2,23 +2,41 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/models/resizable_item_model.dart';
 class ResizableWidget extends StatefulWidget {
-  _ResizableWidgetState widgetState = new _ResizableWidgetState();
-  isSelected(){
-    widgetState.isSelect();
-  }
-  ResizableWidget({this.resizableItemModel});
+  ResizableWidget({this.resizableItemModel,Key key}):super(key: key);
   final ResizableItemModel resizableItemModel;
   @override
-  _ResizableWidgetState createState() => _ResizableWidgetState();
+  ResizableWidgetState createState() => ResizableWidgetState();
 }
 
 const ballDiameter = 30.0;
 
-class _ResizableWidgetState extends State<ResizableWidget> {
+class ResizableWidgetState extends State<ResizableWidget> {
 
-  bool isSelected = false;
+  bool isSelected = true;
+  ResizableItemModel resizableItemModel;
+  @override
+  void initState() {
+    super.initState();
+    resizableItemModel = widget.resizableItemModel;
+    if(resizableItemModel.child is Image) {
+      resizableItemModel.width = 200;
+      resizableItemModel.height = 200;
+    }
+  }
   isSelect(){
-    isSelected = true;
+    setState(() {
+      isSelected = true;
+    });
+  }
+  onTap(){
+    setState(() {
+      isSelected = !isSelected;
+    });
+  }
+  unSelect(){
+    setState(() {
+      isSelected = false;
+    });
   }
   @override
   Widget build(BuildContext context) {
@@ -35,9 +53,7 @@ class _ResizableWidgetState extends State<ResizableWidget> {
           child:
           InkWell(
             onTap: (){
-              setState(() {
-                isSelected = !isSelected;
-              });
+              onTap();
             },
             child: Container(
               height: widget.resizableItemModel.height,
