@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:myapp/models/palette_hue_picker_page.dart';
+import 'package:myapp/models/project_model.dart';
 import 'package:myapp/models/resizable_item_model.dart';
 import 'package:myapp/widgets/resizable_widgett.dart';
 import 'package:path_provider/path_provider.dart';
@@ -29,19 +30,34 @@ class HomePageController extends GetxController{
   ResizableWidget frameWidget;
   RxInt selectedItemIndex = (-1).obs;
   int imageCount=0;
-
-  @override
-  void onInit() {
-    super.onInit();
-    GetStorage box = GetStorage();
-    int layoutLength = box.read('layoutLength');
-    if(layoutLength != null)
-    for(int i=0;i<layoutLength; i++){
-      String layoutStr = box.read('layout$i');
-      ResizableItemModel item = ResizableItemModel.fromJson(json.decode(layoutStr));
+  RxBool showSaveContainer = false.obs;
+  GetStorage box = GetStorage();
+  String projectTitle ="";
+  loadProject(ProjectModel project){
+    projectTitle = project.title;
+    for(int i=0;i<project.items.length; i++){
+      keys.add(GlobalKey());
+      layout.add(ResizableWidget(
+        key: keys[i],
+        resizableItemModel: ResizableItemModel(
+          width: project.items[i].width,
+          height: project.items[i].height,
+          isFrame:project.items[i].isFrame,
+          isImage: project.items[i].isImage,
+          top: project.items[i].top,
+          left: project.items[i].left,
+          title: project.items[i].title,
+          imagePath: project.items[i].imagePath,
+          color: project.items[i].color,
+          child: project.items[i].isImage? Image.file(File(project.items[i].imagePath))
+              : Text(
+            project.items[i].title,
+            style: TextStyle(color: project.items[i].color!=null?project.items[i].color:Colors.black),
+          ),
+        ),
+      ));
     }
   }
-
   onDeleteListTile(int i){
     if(layout[i].resizableItemModel is Image)
      imageCount--;
@@ -72,51 +88,67 @@ class HomePageController extends GetxController{
     return "";
 
   }
+  saveProject()async{
+    TextEditingController textEditingController = TextEditingController();
+    textEditingController.text = projectTitle;
+    Get.bottomSheet(
+      Container(
+        height: 100,
+        color: Colors.white,
+        child: Row(
+          children: [
+            Expanded(child: TextField(
+              controller: textEditingController,
+            )),
+            IconButton(onPressed: (){
+              ProjectModel projectModel = ProjectModel(title: textEditingController.text,layouts: layout);
+              box.write(projectModel.title,jsonEncode(projectModel));
+              Get.back();
+              Get.snackbar('', 'پروژه ذخیره شد');
+            }, icon: Icon(Icons.save))
+          ],
+        ),
+      )
+    );
+  }
   saveAsImage() async {
     savedImagePath = await createFolder();
-    GetStorage box = GetStorage();
-    box.write('layoutLength',layout.length);
-    for(int i=0; i<layout.length;i++)
-      {
-        String s = jsonEncode(layout[i].resizableItemModel);
-        box.write('layout$i',s );
-      }
-    //  if(savedImagePath != "" && savedImagePath != null)
-    //    {
-    //      try{
-    //        var filePath =
-    //            '$savedImagePath/${DateTime.now().millisecondsSinceEpoch}.png';
-    //        RenderRepaintBoundary boundary =
-    //        globalKey.currentContext.findRenderObject();
-    //        ui.Image image = await boundary.toImage(pixelRatio: 3.0);
-    //        ByteData byteData =
-    //        await image.toByteData(format: ui.ImageByteFormat.png);
-    //        var pngBytes = byteData.buffer.asUint8List();
-    //        var bs64 = base64Encode(pngBytes);
-    //        print(pngBytes);
-    //        print(bs64);
-    //        File imgFile = new File(filePath);
-    //        imgFile.writeAsBytes(pngBytes);
-    //        print(imgFile.path);
-    //        Get.defaultDialog(
-    //          title: 'عکس در مسیر زیر ذخیره شد',
-    //          content: Text(filePath),
-    //          actions: [
-    //            InkWell(
-    //              child: Text('باز شود'),
-    //              onTap: (){
-    //                Get.dialog(
-    //                    PhotoView(
-    //                      imageProvider: FileImage(File(filePath)),
-    //                    )
-    //                );
-    //              },
-    //            )
-    //          ],
-    //        );
-    //      }catch(e){
-    //      }
-    // }
+     if(savedImagePath != "" && savedImagePath != null)
+       {
+         try{
+           var filePath =
+               '$savedImagePath/${DateTime.now().millisecondsSinceEpoch}.png';
+           RenderRepaintBoundary boundary =
+           globalKey.currentContext.findRenderObject();
+           ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+           ByteData byteData =
+           await image.toByteData(format: ui.ImageByteFormat.png);
+           var pngBytes = byteData.buffer.asUint8List();
+           var bs64 = base64Encode(pngBytes);
+           print(pngBytes);
+           print(bs64);
+           File imgFile = new File(filePath);
+           imgFile.writeAsBytes(pngBytes);
+           print(imgFile.path);
+           Get.defaultDialog(
+             title: 'عکس در مسیر زیر ذخیره شد',
+             content: Text(filePath),
+             actions: [
+               InkWell(
+                 child: Text('باز شود'),
+                 onTap: (){
+                   Get.dialog(
+                       PhotoView(
+                         imageProvider: FileImage(File(filePath)),
+                       )
+                   );
+                 },
+               )
+             ],
+           );
+         }catch(e){
+         }
+    }
   }
   onColorPicked(Color pickedColor){
     currentColor.value = pickedColor;
@@ -124,12 +156,14 @@ class HomePageController extends GetxController{
   onMenuTapped(int index){
     switch (index){
       case 0:
-        saveAsImage();
+        showSaveContainer.value = true;
         break;
       case 1:
+        showSaveContainer.value = false;
         pickImageFromGallery(false,-1);
         break;
       case 2:
+        showSaveContainer.value = false;
         Get.bottomSheet(
             Container(
               height: 200,
@@ -179,6 +213,7 @@ class HomePageController extends GetxController{
                                       child: Text(textEditingController.text,style: TextStyle(color: currentColor.value),),
                                       title: textEditingController.text,
                                       color: currentColor.value,
+                                      colorStr: '0x${currentColor.value.value.toRadixString(16)}',
                                     ),
                                   ));
                               textEditingController.clear();
@@ -198,7 +233,15 @@ class HomePageController extends GetxController{
         );
         break;
       case 3:
-        pickFrame(-1);
+        showSaveContainer.value = false;
+        int index = -1;
+        for(int i=0;i<layout.length;i++)
+          if(layout[i].resizableItemModel.isFrame)
+            {
+              index = i;
+              break;
+            }
+        pickFrame(index);
         break;
     }
     selectedIndex.value = index;
@@ -269,7 +312,8 @@ class HomePageController extends GetxController{
                           width: layout[i].resizableItemModel.width,
                           height: layout[i].resizableItemModel.height,
                           isFrame: false,
-                          isImage: true,
+                          isImage: false,
+                          imagePath: layout[i].resizableItemModel.imagePath,
                           top: layout[i].resizableItemModel.top,
                           left: layout[i].resizableItemModel.left,
                           child: Text(
@@ -277,6 +321,7 @@ class HomePageController extends GetxController{
                             style: TextStyle(color: currentColor.value),
                           ),
                           color: currentColor.value,
+                          colorStr: '0x${currentColor.value.value.toRadixString(16)}',
                           title: textEditingController.text),
                     );
                     textEditingController.clear();
@@ -302,6 +347,12 @@ class HomePageController extends GetxController{
           resizableItemModel: ResizableItemModel(
             isSelected: true,
             isImage: true,
+            isFrame: false,
+            // width: layout[i].resizableItemModel.width,
+            // height: layout[i].resizableItemModel.height,
+            // top: layout[i].resizableItemModel.top,
+            // left: layout[i].resizableItemModel.left,
+            imagePath: image.value.path,
             title: 'تصویر $imageCount',
             child: Image.file(File(image.value.path)),
           ),
@@ -315,6 +366,7 @@ class HomePageController extends GetxController{
              height: layout[i].resizableItemModel.height,
              isFrame: false,
              isImage: true,
+             imagePath: layout[i].resizableItemModel.imagePath,
              top: layout[i].resizableItemModel.top,
              left: layout[i].resizableItemModel.left,
              title: 'تصویر $imageCount',
@@ -341,6 +393,7 @@ class HomePageController extends GetxController{
               isSelected: false,
               isFrame: true,
               isImage: true,
+              imagePath: frame.value.path,
               title: 'قاب',
               child:Image.file(File(frame.value.path))
           ),);
@@ -354,6 +407,7 @@ class HomePageController extends GetxController{
               isImage: true,
               isFrame: true,
               title: 'قاب',
+              imagePath: frame.value.path,
               child: Image.file(File(frame.value.path))),
         );
         layout.add(frameWidget);

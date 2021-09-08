@@ -3,8 +3,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:myapp/controllers/home_page_controller.dart';
-
+import 'package:shape_of_view/shape_of_view.dart';
 class HomePage extends GetView<HomePageController> {
+  HomePage(){
+    if(Get.arguments != null){
+      controller.loadProject(Get.arguments);
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return
@@ -92,10 +97,75 @@ class HomePage extends GetView<HomePageController> {
             onTap: controller.onMenuTapped,
           ),
           body:
-        RepaintBoundary(
-          key: controller.globalKey,
-          child: Stack(
-              children: controller.layout),
+        Stack(
+          children: [
+
+            controller.showSaveContainer.value?
+            Align(
+              alignment: Alignment.bottomRight,
+              child: Container(
+                height: 150,
+                child: Column(children: [
+                  
+                  Expanded(
+                    flex: 2,
+                    child: InkWell(
+                      onTap: ()=> controller.saveAsImage(),
+                      child: Container(
+                        padding: EdgeInsets.all(16.0),
+                        child: Text('ذخیره به صورت عکس'),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    width: 100,
+                    child: Divider(
+
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: InkWell(
+                      onTap: ()=> controller.saveProject(),
+                      child: Container(
+                        // decoration: BoxDecoration(
+                        //   color: Colors.white,
+                        //     // boxShadow: [
+                        //     //   BoxShadow(
+                        //     //     color: Colors.grey.withOpacity(0.9),
+                        //     //     spreadRadius: 1,
+                        //     //     blurRadius: 5,
+                        //     //     offset: Offset(0, 3), // changes position of shadow
+                        //     //   ),
+                        //     // ],
+                        //   borderRadius: BorderRadius.circular(10)
+                        // ),
+                        padding: EdgeInsets.all(16.0),
+                        child: Text('ذخیره پروژه'),
+                      ),
+                    ),
+                  ),
+                  // Expanded(
+                  //   child: ShapeOfView(
+                  //     height: 30,
+                  //     width: 30,
+                  //     elevation: 1,
+                  //     shape: TriangleShape(
+                  //         percentBottom: 0.5,
+                  //         percentLeft: 0.6,
+                  //         percentRight: 0.6
+                  //     ),
+                  //   ),
+                  // )
+                ],),
+              ),
+            ):Container(),
+            RepaintBoundary(
+              key: controller.globalKey,
+              child: Stack(
+                  children: controller.layout),
+            ),
+          ],
         ),
       ));
   }

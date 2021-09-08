@@ -12,7 +12,7 @@ const ballDiameter = 30.0;
 
 class ResizableWidgetState extends State<ResizableWidget> {
 
-  bool isSelected = true;
+  bool isSelected = false;
   ResizableItemModel resizableItemModel;
   @override
   void initState() {

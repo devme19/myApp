@@ -4,6 +4,7 @@ class ResizableItemModel{
   Widget child;
   bool isImage;
   Color color;
+  String colorStr;
   Color bgColor;
   String title;
   double height;
@@ -12,6 +13,7 @@ class ResizableItemModel{
   double left;
   bool isSelected;
   bool isFrame;
+  String imagePath;
   ResizableItemModel({
     this.child,
     this.color,
@@ -23,12 +25,14 @@ class ResizableItemModel{
     this.top=0,
     this.isSelected,
     this.isFrame = false,
-    this.isImage
+    this.isImage,
+    this.imagePath,
+    this.colorStr
   });
   ResizableItemModel.fromJson(Map<String, dynamic> json) {
     child = json['child'] as Widget;
-    color = json['color'] as Color;
-    bgColor = json['bgColor'] as Color;
+    color = json['colorStr']!= "null" &&  json['colorStr']!= null? Color(int.parse(json['colorStr'])):null;
+    bgColor = json['bgColor']!= "null" ? Color(int.parse(json['bgColor'])):null;
     title = json['title'];
     height = json['height'] as double;
     width = json['width'] as double;
@@ -36,6 +40,8 @@ class ResizableItemModel{
     left = json['left'] as double;
     isFrame = json['isFrame'] as bool;
     isImage = json['isImage'] as bool;
+    imagePath = json['imagePath'];
+    colorStr = json['colorStr'];
   }
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
@@ -49,6 +55,8 @@ class ResizableItemModel{
     data['left'] = this.left;
     data['isFrame'] = this.isFrame;
     data['isImage'] = this.isImage;
+    data['imagePath'] = this.imagePath;
+    data['colorStr'] = this.colorStr;
     return data;
 }
 }
