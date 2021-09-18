@@ -18,10 +18,10 @@ class ResizableWidgetState extends State<ResizableWidget> {
   void initState() {
     super.initState();
     resizableItemModel = widget.resizableItemModel;
-    if(resizableItemModel.child is Image) {
-      resizableItemModel.width = 200;
-      resizableItemModel.height = 200;
-    }
+    // if(resizableItemModel.child is Image) {
+    //   resizableItemModel.width = 200;
+    //   resizableItemModel.height = 200;
+    // }
   }
   isSelect(){
     setState(() {

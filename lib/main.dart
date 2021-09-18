@@ -21,6 +21,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
+        fontFamily: 'fontFamily1',
       ),
       initialRoute: MyAppRoutes.mainPage,
       locale: Locale('fa','IR'),

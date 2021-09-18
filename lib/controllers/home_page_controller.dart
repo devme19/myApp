@@ -2,14 +2,16 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
+import 'package:dynamic_cached_fonts/dynamic_cached_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:myapp/models/font_family_model.dart';
 import 'package:myapp/models/palette_hue_picker_page.dart';
 import 'package:myapp/models/project_model.dart';
 import 'package:myapp/models/resizable_item_model.dart';
-import 'package:myapp/widgets/resizable_widgett.dart';
+import 'package:myapp/widgets/resizable_widget.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_view/photo_view.dart';
@@ -33,9 +35,15 @@ class HomePageController extends GetxController{
   RxBool showSaveContainer = false.obs;
   GetStorage box = GetStorage();
   String projectTitle ="";
+  RxString selectedFontFamily="fontFamily1".obs;
+  RxInt selectedFontFamilyIndex = 0.obs;
   loadProject(ProjectModel project){
+    imageCount = 0;
+
     projectTitle = project.title;
     for(int i=0;i<project.items.length; i++){
+      if(project.items[i].isImage)
+        imageCount++;
       keys.add(GlobalKey());
       layout.add(ResizableWidget(
         key: keys[i],
@@ -52,7 +60,9 @@ class HomePageController extends GetxController{
           child: project.items[i].isImage? Image.file(File(project.items[i].imagePath))
               : Text(
             project.items[i].title,
-            style: TextStyle(color: project.items[i].color!=null?project.items[i].color:Colors.black),
+            style: TextStyle(
+              fontFamily: project.items[i].fontFamily,
+                color: project.items[i].color!=null?project.items[i].color:Colors.black),
           ),
         ),
       ));
@@ -89,6 +99,7 @@ class HomePageController extends GetxController{
 
   }
   saveProject()async{
+    showSaveContainer.value = false;
     TextEditingController textEditingController = TextEditingController();
     textEditingController.text = projectTitle;
     Get.bottomSheet(
@@ -100,8 +111,9 @@ class HomePageController extends GetxController{
             Expanded(child: TextField(
               controller: textEditingController,
             )),
-            IconButton(onPressed: (){
-              ProjectModel projectModel = ProjectModel(title: textEditingController.text,layouts: layout);
+            IconButton(onPressed: () async{
+              String projectCoverImagePath = await saveAsImage(false);
+              ProjectModel projectModel = ProjectModel(title: textEditingController.text,layouts: layout,projectCoverImagePath: projectCoverImagePath);
               box.write(projectModel.title,jsonEncode(projectModel));
               Get.back();
               Get.snackbar('', 'پروژه ذخیره شد');
@@ -111,7 +123,8 @@ class HomePageController extends GetxController{
       )
     );
   }
-  saveAsImage() async {
+  Future<String> saveAsImage(bool saveImage) async {
+    showSaveContainer.value = false;
     savedImagePath = await createFolder();
      if(savedImagePath != "" && savedImagePath != null)
        {
@@ -130,22 +143,24 @@ class HomePageController extends GetxController{
            File imgFile = new File(filePath);
            imgFile.writeAsBytes(pngBytes);
            print(imgFile.path);
-           Get.defaultDialog(
-             title: 'عکس در مسیر زیر ذخیره شد',
-             content: Text(filePath),
-             actions: [
-               InkWell(
-                 child: Text('باز شود'),
-                 onTap: (){
-                   Get.dialog(
-                       PhotoView(
-                         imageProvider: FileImage(File(filePath)),
-                       )
-                   );
-                 },
-               )
-             ],
-           );
+           return imgFile.path;
+           if(saveImage)
+             Get.defaultDialog(
+               title: 'عکس در مسیر زیر ذخیره شد',
+               content: Text(filePath),
+               actions: [
+                 InkWell(
+                   child: Text('باز شود'),
+                   onTap: (){
+                     Get.dialog(
+                         PhotoView(
+                           imageProvider: FileImage(File(filePath)),
+                         )
+                     );
+                   },
+                 )
+               ],
+             );
          }catch(e){
          }
     }
@@ -153,99 +168,7 @@ class HomePageController extends GetxController{
   onColorPicked(Color pickedColor){
     currentColor.value = pickedColor;
   }
-  onMenuTapped(int index){
-    switch (index){
-      case 0:
-        showSaveContainer.value = true;
-        break;
-      case 1:
-        showSaveContainer.value = false;
-        pickImageFromGallery(false,-1);
-        break;
-      case 2:
-        showSaveContainer.value = false;
-        Get.bottomSheet(
-            Container(
-              height: 200,
-              padding: EdgeInsets.all(16.0),
-              color: Colors.white,
-              child:
 
-              SingleChildScrollView(
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            maxLines: null,
-                            // textInputAction: TextInputAction.done,
-                            style: TextStyle(color: currentColor.value),
-                            controller: textEditingController,
-                          ),
-                        ),
-                        SizedBox(width: 16.0,),
-                        InkWell(
-                          onTap: ()=>Get.dialog(
-                              PaletteHuePickerPage(pickedColor: onColorPicked,currentColor: currentColor.value,)
-                          ),
-                          child: Image.asset('assets/icons/color-picker.png',width: 30,height: 30,),
-                        )
-                      ],
-                    ),
-                    ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                            primary: Colors.deepPurple,
-                            shape: new RoundedRectangleBorder(
-                              borderRadius: new BorderRadius.circular(10.0),
-                            )),
-                        onPressed: (){
-                          if(textEditingController.text.isNotEmpty)
-                            {
-                              Get.back();
-                              keys.add(new GlobalKey());
-                              layout.add(
-                                  new ResizableWidget(
-                                    key: keys.last,
-                                    resizableItemModel: ResizableItemModel(
-                                      isSelected: true,
-                                      isImage: false,
-                                      child: Text(textEditingController.text,style: TextStyle(color: currentColor.value),),
-                                      title: textEditingController.text,
-                                      color: currentColor.value,
-                                      colorStr: '0x${currentColor.value.value.toRadixString(16)}',
-                                    ),
-                                  ));
-                              textEditingController.clear();
-                            }
-                          // texts.add(
-                          //     ResizableWidget(child: Text(textEditingController.text,style: TextStyle(color: currentColor.value.toColor()),),deleteItem: deleteItem,)
-                          // );
-                        }, child:
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text('افزودن'),
-                    ))
-                  ],
-                ),
-              ),
-            )
-        );
-        break;
-      case 3:
-        showSaveContainer.value = false;
-        int index = -1;
-        for(int i=0;i<layout.length;i++)
-          if(layout[i].resizableItemModel.isFrame)
-            {
-              index = i;
-              break;
-            }
-        pickFrame(index);
-        break;
-    }
-    selectedIndex.value = index;
-  }
   deleteItem(ResizableWidget widget){
     for(int i = 0; i<layout.length;i++)
       if(layout[i].resizableItemModel.isFrame)
@@ -265,75 +188,246 @@ class HomePageController extends GetxController{
     else {
       textEditingController.text = layout[i].resizableItemModel.title;
       currentColor.value = layout[i].resizableItemModel.color;
-      Get.bottomSheet(Container(
-        height: 200,
-        padding: EdgeInsets.all(16.0),
-        color: Colors.white,
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      maxLines: null,
-                      // textInputAction: TextInputAction.done,
-                      style: TextStyle(color: currentColor.value),
-                      controller: textEditingController,
-                    ),
-                  ),
-                  SizedBox(
-                    width: 16.0,
-                  ),
-                  InkWell(
-                    onTap: () => Get.dialog(PaletteHuePickerPage(
-                      pickedColor: onColorPicked,
-                      currentColor: currentColor.value,
-                    )),
-                    child: Image.asset(
-                      'assets/icons/color-picker.png',
-                      width: 30,
-                      height: 30,
-                    ),
-                  )
-                ],
-              ),
-              ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                      primary: Colors.deepPurple,
-                      shape: new RoundedRectangleBorder(
-                        borderRadius: new BorderRadius.circular(10.0),
-                      )),
-                  onPressed: () {
-                    Get.back();
-                    layout[i] = ResizableWidget(
-                      key: keys[i],
-                      resizableItemModel: ResizableItemModel(
-                          width: layout[i].resizableItemModel.width,
-                          height: layout[i].resizableItemModel.height,
-                          isFrame: false,
-                          isImage: false,
-                          imagePath: layout[i].resizableItemModel.imagePath,
-                          top: layout[i].resizableItemModel.top,
-                          left: layout[i].resizableItemModel.left,
-                          child: Text(
-                            textEditingController.text,
-                            style: TextStyle(color: currentColor.value),
+
+      showModalBottomSheet(
+          context: Get.context, builder: (context){
+        return StatefulBuilder(builder: (context,StateSetter setState){
+          return
+            Padding(
+              padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewInsets.bottom),
+              child: Container(
+                height: Get.height/3,
+                padding: EdgeInsets.all(16.0),
+                color: Colors.white,
+                child:
+
+                Column(
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              maxLines: null,
+                              // textInputAction: TextInputAction.done,
+                              style: TextStyle(color: currentColor.value,fontFamily: layout[i].resizableItemModel.fontFamily),
+                              controller: textEditingController,
+                            ),
                           ),
-                          color: currentColor.value,
-                          colorStr: '0x${currentColor.value.value.toRadixString(16)}',
-                          title: textEditingController.text),
-                    );
-                    textEditingController.clear();
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text('ویرایش'),
-                  ))
-            ],
-          ),
-        ),
-      ));
+                          SizedBox(width: 16.0,),
+                          InkWell(
+                            onTap: ()=>Get.dialog(
+                                PaletteHuePickerPage(pickedColor:(pickedColor){
+                                  setState(()=>currentColor.value = pickedColor);
+                                },currentColor: currentColor.value,)
+                            ),
+                            child: Image.asset('assets/icons/color-picker.png',width: 30,height: 30,),
+                          ),
+                          SizedBox(width: 16.0,),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 16.0,),
+
+                    Expanded(
+                      flex: 3,
+                      child: Container(
+                        // padding: EdgeInsets.all(8.0),
+                        child:
+                        Column(
+                          children: [
+
+                            Row(
+                              children: [
+                                Text('انتخاب فونت'),
+                              ],
+                            ),
+                            SizedBox(height: 8.0,),
+                            Expanded(
+                              child: GridView.builder(
+                                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 3,
+                                      mainAxisSpacing: 5,
+                                      crossAxisSpacing: 5,
+                                      mainAxisExtent: 50
+                                  ),
+                                  itemCount: FontFamilyModel().fontFamily.length,
+                                  itemBuilder: (BuildContext context, int index) {
+                                    return
+                                      InkWell(
+                                        onTap: (){
+                                          setState(()=> selectedFontFamilyIndex.value = index);
+                                          // controller.selectedFontFamilyIndex.value = index;
+                                          selectedFontFamily.value = FontFamilyModel().fontFamily[index];
+                                        },
+                                        child: Container(
+                                            color: selectedFontFamilyIndex.value == index?Colors.grey.withOpacity(0.4):Colors.grey.withOpacity(0.1),
+                                            child: Center(child: Text('سلام',style: TextStyle(fontFamily: FontFamilyModel().fontFamily[index]),))),
+                                      );
+                                  }
+                                // ListView.builder(
+                                //   scrollDirection: Axis.horizontal,
+                                //   itemCount: FontFamilyModel().fontFamily.length,
+                                //     itemBuilder: (context,index){
+                                //     return
+                                //
+                                //       InkWell(
+                                //         onTap: (){
+                                //
+                                //         },
+                                //           child: Container(
+                                //             margin: EdgeInsets.all(3.0),
+                                //             color: Colors.grey.withOpacity(0.2),
+                                //             width: 80,
+                                //               child:
+                                //               Center(child: Text('سلام',style: TextStyle(fontFamily: FontFamilyModel().fontFamily[index]),))));
+                                //     }),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 10.0,),
+                    Expanded(
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                    primary: Colors.deepPurple,
+                                    shape: new RoundedRectangleBorder(
+                                      borderRadius: new BorderRadius.circular(10.0),
+                                    )),
+                                onPressed: (){
+                                  if(textEditingController.text.isNotEmpty)
+                                  {
+                                    Get.back();
+                                    // keys.add(new GlobalKey());
+                                    layout[i] = ResizableWidget(
+                                      key: keys[i],
+                                      resizableItemModel: ResizableItemModel(
+                                          width: layout[i].resizableItemModel.width,
+                                          height: layout[i].resizableItemModel.height,
+                                          isFrame: false,
+                                          isImage: false,
+                                          imagePath: layout[i].resizableItemModel.imagePath,
+                                          top: layout[i].resizableItemModel.top,
+                                          left: layout[i].resizableItemModel.left,
+                                          child: Text(
+                                            textEditingController.text,
+                                            style: TextStyle(color: currentColor.value),
+                                          ),
+                                          color: currentColor.value,
+                                          fontFamily: selectedFontFamily.value,
+                                          colorStr: '0x${currentColor.value.value.toRadixString(16)}',
+                                          title: textEditingController.text),
+                                    );
+                                    textEditingController.clear();
+                                    layout.add(
+                                        new ResizableWidget(
+                                          key: keys.last,
+                                          resizableItemModel: ResizableItemModel(
+                                            isSelected: true,
+                                            isImage: false,
+                                            fontFamily: selectedFontFamily.value,
+                                            child: Text(textEditingController.text,style: TextStyle(color: currentColor.value,fontFamily: selectedFontFamily.value),),
+                                            title: textEditingController.text,
+                                            color: currentColor.value,
+                                            colorStr: '0x${currentColor.value.value.toRadixString(16)}',
+                                          ),
+                                        ));
+                                    textEditingController.clear();
+                                  }
+                                  // texts.add(
+                                  //     ResizableWidget(child: Text(textEditingController.text,style: TextStyle(color: currentColor.value.toColor()),),deleteItem: deleteItem,)
+                                  // );
+                                }, child:
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text('ویرایش'),
+                            )),
+                          ),
+                        ],
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            );
+        });
+      });
+      // Get.bottomSheet(Container(
+      //   height: 200,
+      //   padding: EdgeInsets.all(16.0),
+      //   color: Colors.white,
+      //   child: SingleChildScrollView(
+      //     child: Column(
+      //       children: [
+      //         Row(
+      //           children: [
+      //             Expanded(
+      //               child: TextField(
+      //                 maxLines: null,
+      //                 // textInputAction: TextInputAction.done,
+      //                 style: TextStyle(color: currentColor.value),
+      //                 controller: textEditingController,
+      //               ),
+      //             ),
+      //             SizedBox(
+      //               width: 16.0,
+      //             ),
+      //             InkWell(
+      //               onTap: () => Get.dialog(PaletteHuePickerPage(
+      //                 pickedColor: onColorPicked,
+      //                 currentColor: currentColor.value,
+      //               )),
+      //               child: Image.asset(
+      //                 'assets/icons/color-picker.png',
+      //                 width: 30,
+      //                 height: 30,
+      //               ),
+      //             )
+      //           ],
+      //         ),
+      //         ElevatedButton(
+      //             style: ElevatedButton.styleFrom(
+      //                 primary: Colors.deepPurple,
+      //                 shape: new RoundedRectangleBorder(
+      //                   borderRadius: new BorderRadius.circular(10.0),
+      //                 )),
+      //             onPressed: () {
+      //               Get.back();
+      //               layout[i] = ResizableWidget(
+      //                 key: keys[i],
+      //                 resizableItemModel: ResizableItemModel(
+      //                     width: layout[i].resizableItemModel.width,
+      //                     height: layout[i].resizableItemModel.height,
+      //                     isFrame: false,
+      //                     isImage: false,
+      //                     imagePath: layout[i].resizableItemModel.imagePath,
+      //                     top: layout[i].resizableItemModel.top,
+      //                     left: layout[i].resizableItemModel.left,
+      //                     child: Text(
+      //                       textEditingController.text,
+      //                       style: TextStyle(color: currentColor.value),
+      //                     ),
+      //                     color: currentColor.value,
+      //                     colorStr: '0x${currentColor.value.value.toRadixString(16)}',
+      //                     title: textEditingController.text),
+      //               );
+      //               textEditingController.clear();
+      //             },
+      //             child: Padding(
+      //               padding: const EdgeInsets.all(8.0),
+      //               child: Text('ویرایش'),
+      //             ))
+      //       ],
+      //     ),
+      //   ),
+      // ));
     }
   }
   pickImageFromGallery(bool isEdit,int i) async{

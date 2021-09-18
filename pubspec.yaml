@@ -37,6 +37,7 @@ dependencies:
   photo_view: ^0.12.0
   get_storage: ^2.0.3
   shape_of_view: ^1.0.2
+  dynamic_cached_fonts: ^0.3.1
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -53,6 +54,26 @@ flutter:
   uses-material-design: true
   assets:
     - assets/icons/
+
+  fonts:
+    - family: fontFamily1
+      fonts:
+        - asset: assets/fonts/IRANYekanMobileRegular.ttf
+    - family: fontFamily2
+      fonts:
+        - asset: assets/fonts/IRANYekanMobileLight.ttf
+    - family: fontFamily3
+      fonts:
+        - asset: assets/fonts/IRANYekanBold.ttf
+    - family: fontFamily4
+      fonts:
+        - asset: assets/fonts/IranNastaliq.ttf
+    - family: fontFamily5
+      fonts:
+        - asset: assets/fonts/Mj_Qertaj.ttf
+    - family: fontFamily6
+      fonts:
+        - asset: assets/fonts/Mj_Parand.ttf
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg
