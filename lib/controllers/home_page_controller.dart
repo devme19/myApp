@@ -124,7 +124,7 @@ class HomePageController extends GetxController{
               ProjectModel projectModel = ProjectModel(title: textEditingController.text,layouts: layout,projectCoverImagePath: projectCoverImagePath);
               box.write(projectModel.title,jsonEncode(projectModel));
               saveStatus.value = StateStatus.SUCCESS;
-              Get.snackbar('', 'پروژه ذخیره شد');
+              Get.snackbar('', 'پروژه ذخیره شد',backgroundColor: Colors.black.withOpacity(0.5),colorText: Colors.white);
             }, icon: Icon(Icons.save,color: Colors.purple,))
           ],
         ),
@@ -501,7 +501,8 @@ class HomePageController extends GetxController{
               isImage: true,
               imagePath: frame.value.path,
               title: 'قاب',
-              child:Image.file(File(frame.value.path))
+              child:
+              Image.file(File(frame.value.path))
           ),);
       }
       else {

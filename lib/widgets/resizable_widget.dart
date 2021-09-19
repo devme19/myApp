@@ -42,8 +42,11 @@ class ResizableWidgetState extends State<ResizableWidget> {
   Widget build(BuildContext context) {
     return
       widget.resizableItemModel.isFrame?
-      Container(
-        child: Center(child: widget.resizableItemModel.child),
+      IgnorePointer(
+        ignoring: true,
+        child: Container(
+          child: Center(child: widget.resizableItemModel.child),
+        ),
       ):
       Stack(
       children: <Widget>[

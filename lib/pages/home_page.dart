@@ -132,7 +132,15 @@ class HomePage extends GetView<HomePageController> {
                         width: 150,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.all(Radius.circular(13)),
-                          color: Colors.grey.withOpacity(0.1)
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.3),
+                              spreadRadius: 1,
+                              blurRadius: 1,
+                              offset: Offset(0, 1), // changes position of shadow
+                            ),
+                          ],
                         ),
                         // padding: EdgeInsets.all(16.0),
                         child:
@@ -148,7 +156,15 @@ class HomePage extends GetView<HomePageController> {
                       child: Container(
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.all(Radius.circular(13)),
-                            color: Colors.grey.withOpacity(0.1)
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.3),
+                              spreadRadius: 1,
+                              blurRadius: 1,
+                              offset: Offset(0, 1), // changes position of shadow
+                            ),
+                          ],
                         ),
                         height: 60,
                         width: 150,
@@ -234,18 +250,19 @@ class HomePage extends GetView<HomePageController> {
             return
               Padding(
                 padding: EdgeInsets.only(
-                    bottom: MediaQuery.of(context).viewInsets.bottom),
-                child: Container(
-                height: Get.height/3,
+                    bottom: Get.mediaQuery.viewInsets.bottom),
+                child:
+                Container(
+                height: 380,
                 padding: EdgeInsets.all(16.0),
                 color: Colors.white,
                 child:
 
-                Column(
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    Expanded(
-                      child: Row(
+                SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
                         children: [
                           Expanded(
                             child: TextField(
@@ -267,12 +284,10 @@ class HomePage extends GetView<HomePageController> {
                           SizedBox(width: 16.0,),
                         ],
                       ),
-                    ),
-                    SizedBox(height: 16.0,),
+                      SizedBox(height: 16.0,),
 
-                    Expanded(
-                      flex: 3,
-                      child: Container(
+                      Container(
+                        height: 220,
                         // padding: EdgeInsets.all(8.0),
                         child:
                         Column(
@@ -311,10 +326,8 @@ class HomePage extends GetView<HomePageController> {
                           ],
                         ),
                       ),
-                    ),
-                    SizedBox(height: 10.0,),
-                    Expanded(
-                      child: Row(
+                      SizedBox(height: 10.0,),
+                      Row(
                         children: [
                           Expanded(
                             child: ElevatedButton(
@@ -348,14 +361,14 @@ class HomePage extends GetView<HomePageController> {
                                   // );
                                 }, child:
                             Padding(
-                              padding: const EdgeInsets.all(8.0),
+                              padding: const EdgeInsets.all(16.0),
                               child: Text('افزودن'),
                             )),
                           ),
                         ],
-                      ),
-                    )
-                  ],
+                      )
+                    ],
+                  ),
                 ),
             ),
               );
