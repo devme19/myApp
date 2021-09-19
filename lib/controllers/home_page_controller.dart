@@ -11,6 +11,7 @@ import 'package:myapp/models/font_family_model.dart';
 import 'package:myapp/models/palette_hue_picker_page.dart';
 import 'package:myapp/models/project_model.dart';
 import 'package:myapp/models/resizable_item_model.dart';
+import 'package:myapp/models/state_status.dart';
 import 'package:myapp/widgets/resizable_widget.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -37,12 +38,14 @@ class HomePageController extends GetxController{
   String projectTitle ="";
   RxString selectedFontFamily="fontFamily1".obs;
   RxInt selectedFontFamilyIndex = 0.obs;
+  var saveStatus = StateStatus.INITIAL.obs;
+
   loadProject(ProjectModel project){
     imageCount = 0;
 
     projectTitle = project.title;
     for(int i=0;i<project.items.length; i++){
-      if(project.items[i].isImage)
+      if(project.items[i].isImage && !project.items[i].isFrame)
         imageCount++;
       keys.add(GlobalKey());
       layout.add(ResizableWidget(
@@ -57,6 +60,8 @@ class HomePageController extends GetxController{
           title: project.items[i].title,
           imagePath: project.items[i].imagePath,
           color: project.items[i].color,
+          fontFamily: project.items[i].fontFamily,
+          colorStr: project.items[i].colorStr,
           child: project.items[i].isImage? Image.file(File(project.items[i].imagePath))
               : Text(
             project.items[i].title,
@@ -106,24 +111,28 @@ class HomePageController extends GetxController{
       Container(
         height: 100,
         color: Colors.white,
+        padding: EdgeInsets.all(16.0),
         child: Row(
           children: [
             Expanded(child: TextField(
               controller: textEditingController,
             )),
             IconButton(onPressed: () async{
+              saveStatus.value = StateStatus.LOADING;
+              Get.back();
               String projectCoverImagePath = await saveAsImage(false);
               ProjectModel projectModel = ProjectModel(title: textEditingController.text,layouts: layout,projectCoverImagePath: projectCoverImagePath);
               box.write(projectModel.title,jsonEncode(projectModel));
-              Get.back();
+              saveStatus.value = StateStatus.SUCCESS;
               Get.snackbar('', 'پروژه ذخیره شد');
-            }, icon: Icon(Icons.save))
+            }, icon: Icon(Icons.save,color: Colors.purple,))
           ],
         ),
       )
     );
   }
   Future<String> saveAsImage(bool saveImage) async {
+    saveStatus.value = StateStatus.LOADING;
     showSaveContainer.value = false;
     savedImagePath = await createFolder();
      if(savedImagePath != "" && savedImagePath != null)
@@ -143,7 +152,7 @@ class HomePageController extends GetxController{
            File imgFile = new File(filePath);
            imgFile.writeAsBytes(pngBytes);
            print(imgFile.path);
-           return imgFile.path;
+           saveStatus.value = StateStatus.SUCCESS;
            if(saveImage)
              Get.defaultDialog(
                title: 'عکس در مسیر زیر ذخیره شد',
@@ -152,6 +161,7 @@ class HomePageController extends GetxController{
                  InkWell(
                    child: Text('باز شود'),
                    onTap: (){
+                     Get.back();
                      Get.dialog(
                          PhotoView(
                            imageProvider: FileImage(File(filePath)),
@@ -161,6 +171,8 @@ class HomePageController extends GetxController{
                  )
                ],
              );
+           return imgFile.path;
+
          }catch(e){
          }
     }

@@ -38,6 +38,7 @@ dependencies:
   get_storage: ^2.0.3
   shape_of_view: ^1.0.2
   dynamic_cached_fonts: ^0.3.1
+  flutter_spinkit: ^5.1.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
